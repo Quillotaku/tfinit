@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 import os
 
@@ -7,6 +8,8 @@ try:
     Uso: python tfinit.py --help
     --files FILE_A,FILE_B,...,FILE_N: Crea N ficheros con la extension .tf de Terraform. Si el nombre es variables o backend, se genera también un fichero .tfvars.
     --env ENV_A,ENV_B,...,ENV_N: Uso complementario para ficheros variables y backend. Crea una carpeta variables y/o backend y N ficheros variables-ENV y/o backend-ENV.
+    --no-tfvars: Evita la creación de ficheros .tfvars. Solo aplica a variables y/o backend.
+    --help: Muestra esta ayuda.
 
     EJEMPLOS:
         python tfinit.py --files variables,backend,provider,locals,data --env des,pre,pro
@@ -48,10 +51,17 @@ for filename in sys.argv[sys.argv.index("--files") + 1].split(","):
                 except FileExistsError:
                     # directory already exists
                     pass
-                with open(file=os.path.join(os.getcwd(),filename,f"{filename}-{envs}.tfvars"),encoding="UTF-8",mode="w") as f:
-                    f.write(f"//{filename}-{envs}")
+                try:
+                    sys.argv.index("--no-tfvars")
+                except:
+                    with open(file=f"{filename}/{filename}-{envs}.tfvars", encoding="UTF-8", mode="w") as f:
+                        f.write(f"//{filename}-{envs}")
+
         except:
-            with open(file=f"{filename}.tfvars",encoding="UTF-8",mode="w") as f:
-                f.write(f"//{filename}")
+            try:
+                sys.argv.index("--no-tfvars")
+            except:
+                with open(file=f"{filename}.tfvars",encoding="UTF-8",mode="w") as f:
+                    f.write(f"//{filename}")
     with open(file=f"{filename}.tf",encoding="UTF-8",mode="w") as f:
         f.write(f"//{filename}")
